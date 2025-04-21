@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:mychaty/CreateAccount.dart';
-import 'package:mychaty/HomeScreen.dart';
-import 'package:mychaty/methods.dart';
+import 'package:mychaty/Auth/Methods.dart';
+import 'package:mychaty/Screens/HomeScreen.dart'; // Ensure this file contains the HomeScreen class
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class CreateAccount extends StatefulWidget {
+  const CreateAccount({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<CreateAccount> createState() => _CreateAccountState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _CreateAccountState extends State<CreateAccount> {
 
-  final TextEditingController _email= TextEditingController();
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   bool isLoading = false;
 
@@ -40,17 +40,27 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(vertical: 40),
           child: Column(
             children: [
-              SizedBox(height: size.height * 0.1),
+              // Bouton retour
+              Container(
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
 
-              // Logo ou Icone
-              Icon(Icons.chat_bubble_outline, size: 80, color: Colors.blueAccent),
+              SizedBox(height: 10),
+
+              Icon(Icons.person_add_alt_1, size: 80, color: Colors.blueAccent),
 
               SizedBox(height: 20),
 
               Text(
-                "Bienvenue sur MyChaty",
+                "Créer un compte MyChaty",
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
@@ -58,42 +68,45 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              SizedBox(height: 8),
+              SizedBox(height: 10),
 
               Text(
-                "Connectez-vous pour discuter 👋",
+                "Inscrivez-vous pour continuer 🚀",
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[700],
                 ),
               ),
 
-              SizedBox(height: size.height * 0.08),
+              SizedBox(height: size.height * 0.06),
 
+              _buildTextField(size, "Nom", Icons.person_outline, false, _name),
+              SizedBox(height: 20),
               _buildTextField(size, "Email", Icons.email_outlined, false, _email),
               SizedBox(height: 20),
               _buildTextField(size, "Mot de passe", Icons.lock_outline, true, _password),
+              SizedBox(height: 20),
 
               SizedBox(height: size.height * 0.06),
 
-              _buildLoginButton(size),
+              _buildCreateButton(size),
 
-              SizedBox(height: 30),
-
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const CreateAccount()));
-                },
-                child: Text(
-                  "Créer un compte",
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Déjà un compte ? Connectez-vous",
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -101,8 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildTextField(
-      Size size, String hintText, IconData icon, bool isPassword, TextEditingController cont) {
+  Widget _buildTextField(Size size, String hintText, IconData icon, bool isPassword, TextEditingController cont) {
     return Container(
       width: size.width * 0.85,
       decoration: BoxDecoration(
@@ -119,37 +131,39 @@ class _LoginScreenState extends State<LoginScreen> {
           prefixIcon: Icon(icon, color: Colors.blueAccent),
           hintText: hintText,
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
         ),
       ),
     );
   }
 
-  Widget _buildLoginButton(Size size) {
+  Widget _buildCreateButton(Size size) {
     return GestureDetector(
       onTap: () {
-        if(_email.text.isNotEmpty && _password.text.isNotEmpty) {
+        if(_name.text.isNotEmpty && _email.text.isNotEmpty && _password.text.isNotEmpty) {
           setState(() {
             isLoading = true;
           });
 
-          logIn(_email.text, _password.text).then((user) {
-            if (user != null) {
-              Logger().i("Connexion réussie");
-              setState(() {
-                isLoading = false;
+          createAccount(_name.text, _email.text, _password.text)
+              .then((user) {
+
+                if(user != null) {
+                  setState(() {
+                    isLoading = false;
+                  });
+                  Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => HomeScreen()));
+                  Logger().i("Compte créé avec succès");
+                }else{
+                  Logger().e("Échec de la création du compte");
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
               });
-              Navigator.push(
-                context, MaterialPageRoute(builder: (_) => HomeScreen()));
-            } else {
-              Logger().e("Erreur de connexion");
-              setState(() {
-                isLoading = false;
-              });
-            }
-          });
         }else{
-          Logger().e("Remplissez tous les champs");
+          Logger().i("Veuillez remplir tous les champs");
         }
       },
       child: Container(
@@ -164,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         alignment: Alignment.center,
         child: const Text(
-          "Se connecter",
+          "Créer un compte",
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,

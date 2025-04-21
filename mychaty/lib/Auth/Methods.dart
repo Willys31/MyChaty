@@ -1,11 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:mychaty/LoginScreen.dart';
+import 'package:mychaty/Auth/LoginScreen.dart';
 
 Future<User?> createAccount(String name, String email, String password) async {
   final FirebaseAuth auth = FirebaseAuth.instance;
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   try {
     UserCredential userCredential = await auth.createUserWithEmailAndPassword(
@@ -17,11 +19,17 @@ Future<User?> createAccount(String name, String email, String password) async {
 
     if (user != null) {
       Logger().i("Compte créé avec succès");
-      await user.updateDisplayName(name);
+
+      await firestore.collection('users').doc(auth.currentUser!.uid).set({
+        "name": name,
+        "email": email,
+        "status": "Je suis nouveau sur Chaty",
+      });
+
       return user;
     } else {
       Logger().e("Échec de la création du compte");
-      return null;
+      return user;
     }
   } catch (e) {
     Logger().e("Erreur lors de la création du compte : $e");
@@ -45,7 +53,7 @@ Future<User?> logIn(String email, String password) async {
       return user;
     } else {
       Logger().e("Erreur de connexion");
-      return null;
+      return user;
     }
   } catch (e) {
     Logger().e("Erreur lors de la connexion : $e");
@@ -54,13 +62,12 @@ Future<User?> logIn(String email, String password) async {
 }
 
 Future logOut(BuildContext context) async {
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   try {
     await auth.signOut().then((value) {
       Navigator.push(context, MaterialPageRoute(builder: (_) => LoginScreen()));
     });
-    Logger().i("Déconnexion réussie");
   } catch (e) {
     Logger().e("Erreur lors de la déconnexion : $e");
   }
