@@ -11,107 +11,127 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
-
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-            height: size.height / 20,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFE3F2FD), Color(0xFF90CAF9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          Container(
-            alignment: Alignment.centerLeft,
-            width: size.width / 1.2,
-            child: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              onPressed: () {}),),
-          SizedBox(
-                height: size.height / 50,
-              ),
-          Container(
-            width: size.width / 1.3,
-            child: Text(
-              "Welcome to MyChaty",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: size.height * 0.1),
 
-          Container(
-            width: size.width / 1.3,
-            child: Text(
-              "Connectez-vous pour continuer!",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 25,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: size.height / 10,
-          ),
-          Container(
-            width: size.width,
-            alignment: Alignment.center,
-            child: field(size, "email", Icons.account_box),
-            ),
+              // Logo ou Icone
+              Icon(Icons.chat_bubble_outline, size: 80, color: Colors.blueAccent),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18.0),
-              child: Container(
-                width: size.width,
-                alignment: Alignment.center,
-                child: field(size, "password", Icons.lock),
-              ),
-            ),
-            SizedBox(
-              height: size.height / 10,
-            ),
-            customButton(size),
+              SizedBox(height: 20),
 
-            SizedBox(
-              height: size.height / 40,
-            ),
-            GestureDetector(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => CreateAccount())),
-              child: Text("Créer un compte", style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.w500),),
-            )
-          ],
-        )
+              Text(
+                "Bienvenue sur MyChaty",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey[900],
+                ),
+              ),
+
+              SizedBox(height: 8),
+
+              Text(
+                "Connectez-vous pour discuter 👋",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                ),
+              ),
+
+              SizedBox(height: size.height * 0.08),
+
+              _buildTextField(size, "Email", Icons.email_outlined, false),
+              SizedBox(height: 20),
+              _buildTextField(size, "Mot de passe", Icons.lock_outline, true),
+
+              SizedBox(height: size.height * 0.06),
+
+              _buildLoginButton(size),
+
+              SizedBox(height: 30),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const CreateAccount()));
+                },
+                child: Text(
+                  "Créer un compte",
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget customButton(Size size) {
+  Widget _buildTextField(
+      Size size, String hintText, IconData icon, bool isPassword) {
     return Container(
-      height: size.height / 14,
-      width: size.width / 1.2,
+      width: size.width * 0.85,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: Colors.blue,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+        ],
       ),
-      alignment: Alignment.center,
-      child: Text("Login", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+      child: TextField(
+        obscureText: isPassword,
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon, color: Colors.blueAccent),
+          hintText: hintText,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 18),
+        ),
+      ),
     );
   }
 
-  Widget field(Size size, String hintText, IconData icon) {
-    return Container(
-      height: size.height / 15,
-      width: size.width / 1.3,
-      child: TextField(
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon),
-          hintText: hintText,
-          hintStyle: TextStyle(color: Colors.grey),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10)
-          )
+  Widget _buildLoginButton(Size size) {
+    return GestureDetector(
+      onTap: () {
+        // Action login ici
+      },
+      child: Container(
+        width: size.width * 0.85,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: const [
+            BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 2)),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: const Text(
+          "Se connecter",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
