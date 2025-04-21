@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:mychaty/methods.dart';
+import 'package:mychaty/HomeScreen.dart'; // Ensure this file contains the HomeScreen class
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -8,12 +11,25 @@ class CreateAccount extends StatefulWidget {
 }
 
 class _CreateAccountState extends State<CreateAccount> {
+
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
+      body: isLoading
+      ? Center(
+        child: Container(
+          height: size.height / 20,
+          width: size.width / 20,
+          child: CircularProgressIndicator(),
+        ),
+        ): Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
@@ -64,15 +80,33 @@ class _CreateAccountState extends State<CreateAccount> {
 
               SizedBox(height: size.height * 0.06),
 
-              _buildTextField(size, "Email", Icons.email_outlined, false),
+              _buildTextField(size, "Nom", Icons.person_outline, false, _name),
               SizedBox(height: 20),
-              _buildTextField(size, "Mot de passe", Icons.lock_outline, true),
+              _buildTextField(size, "Email", Icons.email_outlined, false, _email),
               SizedBox(height: 20),
-              _buildTextField(size, "Confirmer le mot de passe", Icons.lock_outline, true),
+              _buildTextField(size, "Mot de passe", Icons.lock_outline, true, _password),
+              SizedBox(height: 20),
 
               SizedBox(height: size.height * 0.06),
 
               _buildCreateButton(size),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Déjà un compte ? Connectez-vous",
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -80,7 +114,7 @@ class _CreateAccountState extends State<CreateAccount> {
     );
   }
 
-  Widget _buildTextField(Size size, String hintText, IconData icon, bool isPassword) {
+  Widget _buildTextField(Size size, String hintText, IconData icon, bool isPassword, TextEditingController cont) {
     return Container(
       width: size.width * 0.85,
       decoration: BoxDecoration(
@@ -91,6 +125,7 @@ class _CreateAccountState extends State<CreateAccount> {
         ],
       ),
       child: TextField(
+        controller: cont,
         obscureText: isPassword,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Colors.blueAccent),
@@ -105,7 +140,31 @@ class _CreateAccountState extends State<CreateAccount> {
   Widget _buildCreateButton(Size size) {
     return GestureDetector(
       onTap: () {
-        // Logique de création de compte ici
+        if(_name.text.isNotEmpty && _email.text.isNotEmpty && _password.text.isNotEmpty) {
+          setState(() {
+            isLoading = true;
+          });
+
+          createAccount(_name.text, _email.text, _password.text)
+              .then((user) {
+
+                if(user != null) {
+                  setState(() {
+                    isLoading = false;
+                  });
+                  Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => HomeScreen()));
+                  Logger().i("Compte créé avec succès");
+                }else{
+                  Logger().e("Échec de la création du compte");
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              });
+        }else{
+          Logger().i("Veuillez remplir tous les champs");
+        }
       },
       child: Container(
         width: size.width * 0.85,

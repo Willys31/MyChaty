@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:mychaty/CreateAccount.dart';
+import 'package:mychaty/HomeScreen.dart';
+import 'package:mychaty/methods.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,12 +12,24 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  final TextEditingController _email= TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
+      body: isLoading
+      ? Center(
+        child: Container(
+          height: size.height / 20,
+          width: size.width / 20,
+          child: CircularProgressIndicator(),
+        ),
+        ): Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
@@ -55,9 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               SizedBox(height: size.height * 0.08),
 
-              _buildTextField(size, "Email", Icons.email_outlined, false),
+              _buildTextField(size, "Email", Icons.email_outlined, false, _email),
               SizedBox(height: 20),
-              _buildTextField(size, "Mot de passe", Icons.lock_outline, true),
+              _buildTextField(size, "Mot de passe", Icons.lock_outline, true, _password),
 
               SizedBox(height: size.height * 0.06),
 
@@ -87,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildTextField(
-      Size size, String hintText, IconData icon, bool isPassword) {
+      Size size, String hintText, IconData icon, bool isPassword, TextEditingController cont) {
     return Container(
       width: size.width * 0.85,
       decoration: BoxDecoration(
@@ -98,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
       child: TextField(
+        controller: cont,
         obscureText: isPassword,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Colors.blueAccent),
@@ -112,7 +128,29 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLoginButton(Size size) {
     return GestureDetector(
       onTap: () {
-        // Action login ici
+        if(_email.text.isNotEmpty && _password.text.isNotEmpty) {
+          setState(() {
+            isLoading = true;
+          });
+
+          logIn(_email.text, _password.text).then((user) {
+            if (user != null) {
+              Logger().i("Connexion réussie");
+              setState(() {
+                isLoading = false;
+              });
+              Navigator.push(
+                context, MaterialPageRoute(builder: (_) => HomeScreen()));
+            } else {
+              Logger().e("Erreur de connexion");
+              setState(() {
+                isLoading = false;
+              });
+            }
+          });
+        }else{
+          Logger().e("Remplissez tous les champs");
+        }
       },
       child: Container(
         width: size.width * 0.85,
