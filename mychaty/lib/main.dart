@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mychaty/Auth/Authenticate.dart';
 import 'package:mychaty/firebase_options.dart';
 
-import 'Auth/LoginScreen.dart';
-
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
